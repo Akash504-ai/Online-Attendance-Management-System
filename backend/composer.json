@@ -1,0 +1,5 @@
+{
+  "name": "trackify/backend",
+  "description": "Trackify PHP API backend",
+  "require": {}
+}
