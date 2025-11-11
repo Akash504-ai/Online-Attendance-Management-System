@@ -1,26 +1,26 @@
 <?php
 /**
  * Database Configuration for Render PostgreSQL
- * (store your real DB_PASS value in Render → Environment Variables)
+ * (hard-coded credentials – use only for testing or in a private repo)
  */
 
 define('DB_HOST', 'dpg-d49ptjuuk2gs739fnh90-a.oregon-postgres.render.com');
 define('DB_PORT', 5432);
 define('DB_USER', 'trackify_user');
-define('DB_PASS', getenv('Mj63AUUeUKMUPR0r7HyHDE0UPIFP7kV2')); // add this variable in Render
+define('DB_PASS', 'Mj63AUUeUKMUPR0r7HyHDE0UPIFP7kV2');   // ⚠️ hard-coded password
 define('DB_NAME', 'trackify_wffq');
 define('DB_CHARSET', 'utf8');
 
 // JWT Configuration
 define('JWT_SECRET', 'your-secret-key-change-this-in-production');
-define('JWT_EXPIRY', 86400); // 24 hours
+define('JWT_EXPIRY', 86400); // 24 hours in seconds
 
 // Application Configuration
 define('APP_URL', 'https://online-attendance-management-system-1.onrender.com');
 define('UPLOAD_DIR', __DIR__ . '/../uploads/');
 define('MAX_UPLOAD_SIZE', 5242880); // 5 MB
 
-// Email Configuration
+// Email Configuration (for password reset)
 define('SMTP_HOST', 'smtp.gmail.com');
 define('SMTP_PORT', 587);
 define('SMTP_USER', 'your-email@gmail.com');
