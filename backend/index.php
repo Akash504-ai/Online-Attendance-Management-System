@@ -25,6 +25,7 @@ if (!file_exists(__DIR__ . '/config/database.php')) {
     exit();
 }
 
+require_once __DIR__ . '/utils/CORS.php';
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/utils/Database.php';
 require_once __DIR__ . '/utils/Response.php';
