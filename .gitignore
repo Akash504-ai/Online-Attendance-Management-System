@@ -10,7 +10,7 @@ frontend/build/
 .env
 .env.local
 .env.production
-backend/config/database.php
+#backend/config/database.php
 
 # IDE
 .vscode/
