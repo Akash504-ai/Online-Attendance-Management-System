@@ -79,7 +79,10 @@ mysql -u root -p trackify < database/schema.sql
 
 4. Configure backend:
 ```bash
-# Update backend/config/database.php with your MySQL credentials
+# Copy example config
+cd backend/config
+copy database.example.php database.php
+# Edit database.php with your credentials
 ```
 
 ### Frontend Setup
@@ -103,6 +106,108 @@ npm run dev
 ```bash
 npm run build
 ```
+
+---
+
+## 📦 Production Deployment
+
+### Quick Deploy - Shared Hosting (cPanel)
+
+**Step 1: Build Frontend**
+```bash
+cd frontend
+npm install
+npm run build
+```
+
+**Step 2: Upload Files**
+
+Upload to `public_html/`:
+- `frontend/dist/*` → Root of public_html
+- `backend/` → `public_html/backend/`
+
+**Step 3: Setup Database**
+1. cPanel → MySQL Databases → Create database
+2. phpMyAdmin → Import `database/schema.sql`
+
+**Step 4: Configure**
+
+Edit `backend/config/database.php`:
+```php
+define('DB_HOST', 'localhost');
+define('DB_USER', 'your_db_user');
+define('DB_PASS', 'your_db_password');
+define('DB_NAME', 'your_db_name');
+define('JWT_SECRET', 'GENERATE_RANDOM_64_CHAR_STRING');
+define('APP_URL', 'https://yourdomain.com');
+
+// Production mode
+error_reporting(0);
+ini_set('display_errors', 0);
+```
+
+**Step 5: Create .htaccess**
+
+Root `.htaccess` (`public_html/.htaccess`):
+```apache
+RewriteEngine On
+
+# Force HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Frontend SPA routing
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/backend
+RewriteRule ^(.*)$ index.html [L,QSA]
+```
+
+**Step 6: Test**
+- Visit `https://yourdomain.com`
+- Login with admin@trackify.com / admin123
+- **Change password immediately!**
+
+### VPS/Cloud Deployment
+
+For Ubuntu/Linux servers:
+
+```bash
+# Install dependencies
+sudo apt update
+sudo apt install -y nginx mysql-server php8.1-fpm php8.1-mysql \
+    php8.1-mbstring php8.1-xml php8.1-curl nodejs npm certbot
+
+# Setup database
+sudo mysql -e "CREATE DATABASE trackify;"
+sudo mysql -e "CREATE USER 'trackify_user'@'localhost' IDENTIFIED BY 'password';"
+sudo mysql -e "GRANT ALL PRIVILEGES ON trackify.* TO 'trackify_user'@'localhost';"
+mysql -u trackify_user -p trackify < database/schema.sql
+
+# Build and deploy
+cd frontend && npm install && npm run build
+sudo mkdir -p /var/www/trackify/public
+sudo cp -r dist/* /var/www/trackify/public/
+sudo cp -r ../backend /var/www/trackify/public/backend
+
+# Configure Nginx (see SETUP.md for full config)
+sudo systemctl restart nginx
+
+# Setup SSL
+sudo certbot --nginx -d yourdomain.com
+```
+
+### Docker Deployment
+
+```bash
+# Build frontend
+cd frontend && npm run build && cd ..
+
+# Create docker-compose.yml (see SETUP.md)
+docker-compose up -d
+```
+
+**See SETUP.md for detailed deployment instructions**
 
 ## 🔐 Default Credentials
 

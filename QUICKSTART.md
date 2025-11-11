@@ -1,6 +1,72 @@
-# 🚀 Trackify Quick Start Guide
+# 🚀 Trackify - Quick Start & Deployment Guide
 
-Get your attendance management system up and running in 5 minutes!
+## 🚨 PRODUCTION DEPLOYMENT - START HERE
+
+### Step 1: Build Frontend (Required First!)
+
+```bash
+# Open Command Prompt or PowerShell
+cd c:\xampp\htdocs\Trackify\frontend
+npm install
+npm run build
+```
+
+**This creates `frontend/dist/` folder with production-ready files.**
+
+### Step 2: Choose Your Deployment Method
+
+#### Option A: Shared Hosting (Easiest)
+
+1. **Upload Files:**
+   - Upload `frontend/dist/*` to `public_html/`
+   - Upload `backend/` to `public_html/backend/`
+
+2. **Setup Database:**
+   - cPanel → MySQL → Create database
+   - phpMyAdmin → Import `database/schema.sql`
+
+3. **Configure:**
+   - Edit `backend/config/database.php` with your credentials
+   - Generate JWT secret: https://www.random.org/strings/
+
+4. **Test:**
+   - Visit your domain
+   - Login: admin@trackify.com / admin123
+   - **Change password immediately!**
+
+**Full instructions:** See SETUP.md → Production Deployment → Option 1
+
+#### Option B: VPS/Cloud Server
+
+```bash
+# On your server
+git clone your-repo
+cd trackify
+
+# Run deployment script (see SETUP.md for script)
+chmod +x deploy.sh
+sudo ./deploy.sh
+```
+
+**Full instructions:** See SETUP.md → Production Deployment → Option 2
+
+#### Option C: Docker
+
+```bash
+# Build frontend first
+cd frontend && npm run build && cd ..
+
+# Start containers
+docker-compose up -d
+```
+
+**Full instructions:** See SETUP.md → Production Deployment → Option 3
+
+---
+
+## 💻 LOCAL DEVELOPMENT SETUP
+
+Get your attendance management system up and running locally in 5 minutes!
 
 ## ⚡ Quick Setup
 

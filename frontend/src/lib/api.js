@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://trackify.free.nf/backend';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost/Trackify/backend'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
