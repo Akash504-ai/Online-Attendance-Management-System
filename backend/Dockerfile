@@ -1,15 +1,19 @@
 # Use official PHP 8.2 image with Apache
 FROM php:8.2-apache
 
-# Install required system dependencies and PostgreSQL PDO driver
-RUN apt-get update && apt-get install -y libpq-dev \
-    && docker-php-ext-install pdo_pgsql pgsql \
+# Prevent interactive prompts during install
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Update system and install dependencies
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    && docker-php-ext-install pdo pdo_pgsql pgsql \
     && docker-php-ext-enable pdo_pgsql pgsql
 
-# Enable Apache modules (rewrite + headers)
+# Enable Apache modules
 RUN a2enmod headers rewrite
 
-# Prevent Apache domain warning
+# Fix Apache hostname warning
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 # Copy backend files
@@ -21,5 +25,5 @@ WORKDIR /var/www/html/
 # Expose port 80
 EXPOSE 80
 
-# Start Apache server
+# Start Apache
 CMD ["apache2-foreground"]
