@@ -1,19 +1,19 @@
-# ✅ Start from PHP 8.2 with Apache preconfigured
+# ✅ Use prebuilt PHP + Apache image (already has rewrite + headers)
 FROM thecodingmachine/php:8.2-v4-apache
 
-# Switch to root temporarily for installing extensions
+# Switch to root to install pgsql extensions
 USER root
 WORKDIR /var/www/html
 
 # ✅ Install PostgreSQL PDO drivers
 RUN apt-get update && apt-get install -y libpq-dev \
-    && docker-php-ext-install pdo pdo_pgsql pgsql \
+    && docker-php-ext-install pdo_pgsql pgsql \
     && docker-php-ext-enable pdo_pgsql pgsql
 
 # ✅ Copy backend code
 COPY . /var/www/html
 
-# ✅ Add global CORS using Apache envvars (no a2enmod)
+# ✅ Add CORS config directly into Apache
 RUN echo '\n\
 <IfModule mod_headers.c>\n\
   Header always set Access-Control-Allow-Origin "*"\n\
@@ -24,14 +24,11 @@ RUN echo '\n\
 # ✅ Fix Apache warning
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-# ✅ Permissions
+# ✅ Permissions for app
 RUN chown -R www-data:www-data /var/www/html
 
-# ✅ Expose port
-EXPOSE 80
-
-# ✅ Switch back to non-root user
+# ✅ Switch back to safe user
 USER docker
 
-# ✅ Start Apache
+EXPOSE 80
 CMD ["apache2-foreground"]
