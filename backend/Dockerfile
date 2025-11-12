@@ -1,15 +1,12 @@
 FROM thecodingmachine/php:8.2-v4-apache
 
-# Switch to root to install stuff
+# Switch to root user
 USER root
 
-# Install PostgreSQL + PHP driver
-RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    php8.2-pgsql \
-    && phpenmod pgsql pdo_pgsql
+# Install PostgreSQL PDO support (simple and reliable way)
+RUN apt-get update && apt-get install -y libpq-dev php-pgsql && phpenmod pgsql pdo_pgsql
 
-# Enable Apache modules
+# Enable Apache modules for rewrite & headers
 RUN a2enmod rewrite headers
 
 # Add CORS configuration
@@ -22,11 +19,11 @@ WORKDIR /var/www/html
 # Copy project files
 COPY . /var/www/html
 
-# Fix Apache warning
+# Fix Apache warnings
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-# Permissions
+# Set permissions
 RUN chown -R www-data:www-data /var/www/html
 
-# Switch back to non-root
+# Switch back to www-data user
 USER www-data
