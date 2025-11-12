@@ -1,25 +1,36 @@
-# ✅ Use a prebuilt image that already has PHP + PostgreSQL drivers
-FROM bitnami/php-fpm:8.2
+# ✅ Use PHP 8.2 with Apache (includes build tools)
+FROM php:8.2-apache-bullseye
 
-# Install Apache manually
-USER root
-RUN apt-get update && apt-get install -y apache2 libapache2-mod-fcgid && \
-    a2enmod proxy_fcgi setenvif rewrite headers && \
-    echo "ServerName localhost" >> /etc/apache2/apache2.conf
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Enable CORS globally
+# ✅ Install PostgreSQL extensions the guaranteed way
+RUN apt-get update && apt-get install -y libpq-dev \
+    && docker-php-ext-install pdo pdo_pgsql pgsql \
+    && docker-php-ext-enable pdo_pgsql pgsql \
+    && php -m | grep -E "pgsql|pdo_pgsql" || (echo '❌ PostgreSQL driver not loaded' && exit 1)
+
+# ✅ Enable Apache modules
+RUN a2enmod headers rewrite
+
+# ✅ Global CORS configuration
 RUN echo '<IfModule mod_headers.c>\n\
   Header always set Access-Control-Allow-Origin "*"\n\
   Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"\n\
   Header always set Access-Control-Allow-Headers "Content-Type, Authorization"\n\
-</IfModule>\n' > /etc/apache2/conf-available/cors.conf && a2enconf cors
+</IfModule>\n' > /etc/apache2/conf-available/cors.conf \
+  && a2enconf cors
 
-# Copy your backend
+# ✅ Fix Apache warning
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+
+# ✅ Copy your backend files
 COPY . /var/www/html/
 
+# ✅ Set working directory
 WORKDIR /var/www/html/
 
-# Apache runs on port 8080 in Bitnami images
-EXPOSE 8080
+# ✅ Expose Apache default port
+EXPOSE 80
 
-CMD ["bash", "-c", "apachectl -D FOREGROUND"]
+# ✅ Start Apache
+CMD ["apache2-foreground"]
