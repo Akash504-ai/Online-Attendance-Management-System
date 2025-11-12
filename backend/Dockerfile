@@ -1,22 +1,19 @@
-# Use PHP image with common extensions preinstalled
+# ✅ Start from same PHP + Apache base
 FROM thecodingmachine/php:8.2-v4-apache
 
-# Ensure we run admin commands as root
 USER root
-
-# Set working directory
 WORKDIR /var/www/html
 
-# Copy backend files into container
-COPY . /var/www/html
+# ✅ Install PostgreSQL driver (the missing part!)
+RUN apt-get update && apt-get install -y libpq-dev \
+    && docker-php-ext-install pdo pdo_pgsql pgsql \
+    && docker-php-ext-enable pdo_pgsql pgsql \
+    && php -m | grep pgsql || (echo '❌ PGSQL not loaded!' && exit 1)
 
-# Enable Apache modules (must run as root)
+# ✅ Enable Apache modules
 RUN a2enmod rewrite headers || true
 
-# Add ServerName to suppress warnings
-RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
-
-# Add global CORS config safely
+# ✅ Add global CORS
 RUN printf '%s\n' '<IfModule mod_headers.c>' \
   '  Header always set Access-Control-Allow-Origin "*"' \
   '  Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"' \
@@ -24,18 +21,11 @@ RUN printf '%s\n' '<IfModule mod_headers.c>' \
   '</IfModule>' > /etc/apache2/conf-available/cors.conf \
   && a2enconf cors || true
 
-# Make sure web files are readable and writable by www-data if needed
-RUN chown -R www-data:www-data /var/www/html || true
-RUN find /var/www/html -type d -exec chmod 755 {} \; || true
-RUN find /var/www/html -type f -exec chmod 644 {} \; || true
+# ✅ Copy backend files
+COPY . /var/www/html
 
-# Optional: add a quick phpinfo for debugging (remove later)
-RUN printf "<?php\nphpinfo();\n" > /var/www/html/phpinfo.php
+# ✅ Set file permissions
+RUN chown -R www-data:www-data /var/www/html
 
-# Expose port 80 and run Apache in foreground
 EXPOSE 80
-
-# Switch back to default user (optional). If image expects root to run apache, you can keep root.
-USER root
-
 CMD ["apache2-foreground"]
