@@ -4,6 +4,8 @@
  * Access: http://localhost/Trackify/backend/test.php
  */
 
+require_once __DIR__ . '/utils/CORS.php';
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 

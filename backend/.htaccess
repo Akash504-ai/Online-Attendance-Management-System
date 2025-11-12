@@ -1,2 +1,17 @@
 # .htaccess disabled - using direct file paths instead
 # If you need URL rewriting, enable mod_headers in Apache first
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Allow OPTIONS to pass through
+    RewriteCond %{REQUEST_METHOD} OPTIONS
+    RewriteRule ^(.*)$ $1 [L]
+
+    # Send all requests to PHP normally
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+DirectoryIndex index.php
