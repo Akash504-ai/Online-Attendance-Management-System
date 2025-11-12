@@ -3,7 +3,8 @@ FROM php:8.2-apache
 
 # Install required system dependencies and PostgreSQL PDO driver
 RUN apt-get update && apt-get install -y libpq-dev \
-    && docker-php-ext-install pdo_pgsql pgsql
+    && docker-php-ext-install pdo_pgsql pgsql \
+    && docker-php-ext-enable pdo_pgsql pgsql
 
 # Enable Apache modules (rewrite + headers)
 RUN a2enmod headers rewrite
