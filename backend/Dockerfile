@@ -3,18 +3,20 @@ FROM php:8.2-apache
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Update and install PostgreSQL PDO support
-RUN apt-get update \
-    && apt-get install -y libpq-dev \
-    && docker-php-ext-configure pgsql --with-pgsql \
+# Update system and install PostgreSQL extensions directly
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    php8.2-pgsql \
     && docker-php-ext-install pdo pdo_pgsql pgsql \
-    && docker-php-ext-enable pdo pdo_pgsql pgsql \
-    && php -m | grep -E "pgsql|pdo_pgsql" || (echo "❌ pgsql not loaded" && exit 1)
+    && docker-php-ext-enable pdo_pgsql pgsql
+
+# Verify that PostgreSQL drivers are enabled
+RUN php -m | grep -E "pgsql|pdo_pgsql" || (echo "❌ pgsql not loaded" && exit 1)
 
 # Enable Apache modules
 RUN a2enmod headers rewrite
 
-# Silence Apache domain warnings
+# Fix Apache warning
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 # Copy your backend code
