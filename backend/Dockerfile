@@ -1,37 +1,37 @@
-# ✅ Start with PHP 8.2 + Apache (includes everything)
+# ✅ Start from PHP 8.2 with Apache preconfigured
 FROM thecodingmachine/php:8.2-v4-apache
 
-# Temporarily switch to root for setup
+# Switch to root temporarily for installing extensions
 USER root
-
 WORKDIR /var/www/html
 
-# ✅ Install PostgreSQL PDO driver (the missing part)
+# ✅ Install PostgreSQL PDO drivers
 RUN apt-get update && apt-get install -y libpq-dev \
     && docker-php-ext-install pdo pdo_pgsql pgsql \
     && docker-php-ext-enable pdo_pgsql pgsql
 
-# ✅ Enable Apache modules (permission fix)
-RUN bash -c "a2enmod rewrite || true" && bash -c "a2enmod headers || true"
-
-# ✅ Add CORS globally
-RUN printf '%s\n' '<IfModule mod_headers.c>' \
-  '  Header always set Access-Control-Allow-Origin "*"' \
-  '  Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"' \
-  '  Header always set Access-Control-Allow-Headers "Content-Type, Authorization"' \
-  '</IfModule>' > /etc/apache2/conf-available/cors.conf && a2enconf cors || true
-
-# ✅ Copy your backend files
+# ✅ Copy backend code
 COPY . /var/www/html
 
-# ✅ Permissions fix
-RUN chown -R www-data:www-data /var/www/html
+# ✅ Add global CORS using Apache envvars (no a2enmod)
+RUN echo '\n\
+<IfModule mod_headers.c>\n\
+  Header always set Access-Control-Allow-Origin "*"\n\
+  Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"\n\
+  Header always set Access-Control-Allow-Headers "Content-Type, Authorization"\n\
+</IfModule>\n' >> /etc/apache2/apache2.conf
 
 # ✅ Fix Apache warning
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-# ✅ Switch back to non-root for Render safety
+# ✅ Permissions
+RUN chown -R www-data:www-data /var/www/html
+
+# ✅ Expose port
+EXPOSE 80
+
+# ✅ Switch back to non-root user
 USER docker
 
-EXPOSE 80
+# ✅ Start Apache
 CMD ["apache2-foreground"]
