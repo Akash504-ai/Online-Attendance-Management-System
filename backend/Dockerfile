@@ -1,10 +1,12 @@
-# Use a stable PHP + Apache base image
 FROM thecodingmachine/php:8.2-v4-apache
 
-# Install PostgreSQL support for PDO
+# Switch to root user to install packages
+USER root
+
+# Install PostgreSQL driver for PDO
 RUN apt-get update && apt-get install -y libpq-dev && docker-php-ext-install pdo_pgsql pgsql
 
-# Enable Apache modules for URL rewriting and headers (needed for REST APIs and CORS)
+# Enable Apache modules
 RUN a2enmod rewrite headers
 
 # Add global CORS configuration
@@ -14,7 +16,7 @@ RUN echo '\n<IfModule mod_headers.c>\n  Header always set Access-Control-Allow-O
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy application files
+# Copy all project files
 COPY . /var/www/html
 
 # Add server name to avoid Apache warnings
@@ -22,3 +24,6 @@ RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
 # Set correct permissions for Apache to serve files
 RUN chown -R www-data:www-data /var/www/html
+
+# Switch back to non-root user for security
+USER www-data
