@@ -1,30 +1,25 @@
-# ✅ Use official PHP 8.2 image with Apache
-FROM php:8.2-apache
+# ✅ Use a prebuilt image that already has PHP + PostgreSQL drivers
+FROM bitnami/php-fpm:8.2
 
-ENV DEBIAN_FRONTEND=noninteractive
+# Install Apache manually
+USER root
+RUN apt-get update && apt-get install -y apache2 libapache2-mod-fcgid && \
+    a2enmod proxy_fcgi setenvif rewrite headers && \
+    echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-# ✅ Install Postgres PDO extensions properly
-RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    && docker-php-ext-configure pdo_pgsql --with-pdo-pgsql \
-    && docker-php-ext-install pdo_pgsql pgsql \
-    && docker-php-ext-enable pdo_pgsql pgsql \
-    && php -m | grep -E "pgsql|pdo_pgsql" || (echo '❌ PostgreSQL driver not loaded!' && exit 1)
+# Enable CORS globally
+RUN echo '<IfModule mod_headers.c>\n\
+  Header always set Access-Control-Allow-Origin "*"\n\
+  Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"\n\
+  Header always set Access-Control-Allow-Headers "Content-Type, Authorization"\n\
+</IfModule>\n' > /etc/apache2/conf-available/cors.conf && a2enconf cors
 
-# ✅ Enable Apache modules
-RUN a2enmod headers rewrite
-
-# ✅ Silence Apache warning
-RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
-
-# ✅ Copy backend code into container
+# Copy your backend
 COPY . /var/www/html/
 
-# ✅ Set working directory
 WORKDIR /var/www/html/
 
-# ✅ Expose port 80
-EXPOSE 80
+# Apache runs on port 8080 in Bitnami images
+EXPOSE 8080
 
-# ✅ Start Apache server
-CMD ["apache2-foreground"]
+CMD ["bash", "-c", "apachectl -D FOREGROUND"]
