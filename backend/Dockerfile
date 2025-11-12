@@ -5,17 +5,8 @@ FROM php:8.2-apache
 RUN apt-get update && apt-get install -y libpq-dev \
     && docker-php-ext-install pdo_pgsql pgsql
 
-# Enable Apache modules
+# Enable Apache modules (rewrite + headers)
 RUN a2enmod headers rewrite
-
-# Configure global CORS headers safely
-RUN echo '<IfModule mod_headers.c>\n\
-  Header always set Access-Control-Allow-Origin "*"\n\
-  Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"\n\
-  Header always set Access-Control-Allow-Headers "Content-Type, Authorization"\n\
-  Header always set Access-Control-Max-Age "86400"\n\
-</IfModule>\n' > /etc/apache2/conf-available/cors.conf \
-  && a2enconf cors
 
 # Prevent Apache domain warning
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
