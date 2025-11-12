@@ -12,9 +12,10 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    // Local proxy only used in development
     proxy: {
       '/api': {
-        target: 'http://localhost/Trackify/backend',
+        target: 'http://localhost/Trackify/backend', // for local dev
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '/api'),
       },
@@ -36,6 +37,5 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 1000,
   },
-  // Use relative base for flexible deployment
-  base: './',
+  base: './', // ✅ correct for relative asset paths (Vercel, GitHub Pages, etc.)
 })
