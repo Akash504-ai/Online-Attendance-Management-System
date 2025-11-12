@@ -6,8 +6,19 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && docker-php-ext-install pdo_pgsql pgsql
 
-# Enable Apache mod_rewrite (useful for APIs)
-RUN a2enmod rewrite
+# Enable Apache modules: rewrite + headers
+RUN a2enmod rewrite headers
+
+# Add global CORS configuration for all responses
+RUN echo '\
+<Directory /var/www/html>\n\
+    Header always set Access-Control-Allow-Origin "*"\n\
+    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"\n\
+    Header always set Access-Control-Allow-Headers "Content-Type, Authorization"\n\
+    Header always set Access-Control-Max-Age "86400"\n\
+    RewriteEngine On\n\
+</Directory>\n\
+' > /etc/apache2/conf-available/cors.conf && a2enconf cors
 
 # Copy backend files to Apache web directory
 COPY . /var/www/html/
@@ -15,7 +26,7 @@ COPY . /var/www/html/
 # Set working directory
 WORKDIR /var/www/html/
 
-# Expose port 80
+# Expose port 80 (Render automatically maps it)
 EXPOSE 80
 
 # Start Apache server
