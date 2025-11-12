@@ -1,32 +1,28 @@
-FROM thecodingmachine/php:8.2-v4-apache
+FROM php:8.2-apache
 
-# Switch to root to install stuff
-USER root
-
-# Install PostgreSQL PDO extension safely (no extra tools)
-RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    php8.2-pgsql \
-    && phpenmod pgsql pdo_pgsql
+# Install PostgreSQL PDO extension directly
+RUN apt-get update && apt-get install -y libpq-dev \
+    && docker-php-ext-configure pdo_pgsql --with-pdo-pgsql \
+    && docker-php-ext-install pdo_pgsql pgsql
 
 # Enable Apache modules
 RUN a2enmod rewrite headers
 
-# Add CORS config
+# Add CORS configuration
 RUN echo '\n<IfModule mod_headers.c>\n  Header always set Access-Control-Allow-Origin "*"\n  Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"\n  Header always set Access-Control-Allow-Headers "Content-Type, Authorization"\n</IfModule>\n' \
     > /etc/apache2/conf-available/cors.conf && a2enconf cors
 
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy project files
+# Copy all source files
 COPY . /var/www/html
 
-# Fix Apache warnings
+# Fix Apache warning
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-# Set permissions
+# Set file permissions
 RUN chown -R www-data:www-data /var/www/html
 
-# Switch back to non-root user
-USER www-data
+EXPOSE 80
+CMD ["apache2-foreground"]
