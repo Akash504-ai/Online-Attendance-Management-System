@@ -1,10 +1,13 @@
 FROM thecodingmachine/php:8.2-v4-apache
 
-# Switch to root user
+# Switch to root to install stuff
 USER root
 
-# Enable PostgreSQL extensions (already included in this image)
-RUN docker-php-ext-enable pdo_pgsql pgsql 2>/dev/null || true
+# Install PostgreSQL + PHP driver
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    php8.2-pgsql \
+    && phpenmod pgsql pdo_pgsql
 
 # Enable Apache modules
 RUN a2enmod rewrite headers
@@ -16,14 +19,14 @@ RUN echo '\n<IfModule mod_headers.c>\n  Header always set Access-Control-Allow-O
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy all project files
+# Copy project files
 COPY . /var/www/html
 
-# Add ServerName to fix Apache warning
+# Fix Apache warning
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-# Fix permissions
+# Permissions
 RUN chown -R www-data:www-data /var/www/html
 
-# Switch back to www-data for safety
+# Switch back to non-root
 USER www-data
