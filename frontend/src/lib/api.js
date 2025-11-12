@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const API_BASE_URL = 'https://online-attendance-management-system-1.onrender.com/';
+// 👇 Use your live backend (make sure it matches your latest Render URL)
+const API_BASE_URL = 'https://online-attendance-management-system-2.onrender.com';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -9,7 +10,7 @@ const api = axios.create({
   },
 })
 
-// Request interceptor to add auth token
+// ✅ Request interceptor — attach JWT token if available
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
@@ -18,12 +19,10 @@ api.interceptors.request.use(
     }
     return config
   },
-  (error) => {
-    return Promise.reject(error)
-  }
+  (error) => Promise.reject(error)
 )
 
-// Response interceptor to handle errors
+// ✅ Response interceptor — auto logout on 401
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
@@ -36,7 +35,7 @@ api.interceptors.response.use(
   }
 )
 
-// Auth APIs - using direct file paths (no .htaccess rewriting)
+// 👇 Auth APIs
 export const authAPI = {
   login: (credentials) => api.post('/api/auth/login.php', credentials),
   signup: (userData) => api.post('/api/auth/signup.php', userData),
@@ -46,7 +45,7 @@ export const authAPI = {
   resetPassword: (data) => api.post('/api/auth/reset-password.php', data),
 }
 
-// User APIs - using direct file paths (no .htaccess rewriting)
+// 👇 User APIs
 export const userAPI = {
   list: (params) => api.get('/api/users/list.php', { params }),
   get: (id) => api.get(`/api/users/get.php?id=${id}`),
@@ -55,7 +54,7 @@ export const userAPI = {
   delete: (id) => api.delete(`/api/users/delete.php?id=${id}`),
 }
 
-// Attendance APIs - using direct file paths (no .htaccess rewriting)
+// 👇 Attendance APIs
 export const attendanceAPI = {
   list: (params) => api.get('/api/attendance/list.php', { params }),
   get: (id) => api.get(`/api/attendance/get.php?id=${id}`),
@@ -67,33 +66,33 @@ export const attendanceAPI = {
   report: (params) => api.get('/api/attendance/report.php', { params }),
 }
 
-// Dashboard APIs - using direct file paths (no .htaccess rewriting)
+// 👇 Dashboard APIs
 export const dashboardAPI = {
   stats: () => api.get('/api/dashboard/stats.php'),
 }
 
-// Subject APIs
+// 👇 Subject APIs
 export const subjectAPI = {
-  list: (params) => api.get('/api/subjects', { params }),
-  create: (data) => api.post('/api/subjects', data),
-  update: (id, data) => api.put(`/api/subjects/${id}`, data),
-  delete: (id) => api.delete(`/api/subjects/${id}`),
+  list: (params) => api.get('/api/subjects/list.php', { params }),
+  create: (data) => api.post('/api/subjects/create.php', data),
+  update: (id, data) => api.put(`/api/subjects/update.php?id=${id}`, data),
+  delete: (id) => api.delete(`/api/subjects/delete.php?id=${id}`),
 }
 
-// Department APIs
+// 👇 Department APIs
 export const departmentAPI = {
-  list: (params) => api.get('/api/departments', { params }),
-  create: (data) => api.post('/api/departments', data),
-  update: (id, data) => api.put(`/api/departments/${id}`, data),
-  delete: (id) => api.delete(`/api/departments/${id}`),
+  list: (params) => api.get('/api/departments/list.php', { params }),
+  create: (data) => api.post('/api/departments/create.php', data),
+  update: (id, data) => api.put(`/api/departments/update.php?id=${id}`, data),
+  delete: (id) => api.delete(`/api/departments/delete.php?id=${id}`),
 }
 
-// Class APIs
+// 👇 Class APIs
 export const classAPI = {
-  list: (params) => api.get('/api/classes', { params }),
-  create: (data) => api.post('/api/classes', data),
-  update: (id, data) => api.put(`/api/classes/${id}`, data),
-  delete: (id) => api.delete(`/api/classes/${id}`),
+  list: (params) => api.get('/api/classes/list.php', { params }),
+  create: (data) => api.post('/api/classes/create.php', data),
+  update: (id, data) => api.put(`/api/classes/update.php?id=${id}`, data),
+  delete: (id) => api.delete(`/api/classes/delete.php?id=${id}`),
 }
 
 export default api
